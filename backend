@@ -1,0 +1,79 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+#define MAX_LEN 100
+
+typedef struct {
+    char var[MAX_LEN];
+    char value[MAX_LEN];
+} SymbolTable;
+
+SymbolTable symTable[MAX_LEN];
+int symCount = 0;
+
+void addToSymbolTable(char* var, char* value) {
+    strcpy(symTable[symCount].var, var);
+    strcpy(symTable[symCount].value, value);
+    symCount++;
+}
+
+void printSymbolTable() {
+    printf("\nSymbol Table:\n");
+    for (int i = 0; i < symCount; i++) {
+        printf("%s = %s\n", symTable[i].var, symTable[i].value);
+    }
+}
+
+void generateAssembly(char* expression) {
+    char tempVar[MAX_LEN];
+    int tempCount = 0;
+    char op1[MAX_LEN], op2[MAX_LEN], oper;
+
+    printf("\nGenerated Assembly Code:\n");
+
+    for (int i = 0; expression[i] != '\0'; i++) {
+        if (expression[i] == '+' || expression[i] == '-' || expression[i] == '*' || expression[i] == '/') {
+            oper = expression[i];
+
+            // Assuming single-character operands for simplicity
+            strncpy(op1, expression + i - 1, 1);
+            strncpy(op2, expression + i + 1, 1);
+            op1[1] = '\0';
+            op2[1] = '\0';
+
+            sprintf(tempVar, "t%d", tempCount++);
+            addToSymbolTable(tempVar, "");
+
+            printf("MOV R0, %s\n", op1);
+            switch (oper) {
+                case '+':
+                    printf("ADD R0, %s\n", op2);
+                    break;
+                case '-':
+                    printf("SUB R0, %s\n", op2);
+                    break;
+                case '*':
+                    printf("MUL R0, %s\n", op2);
+                    break;
+                case '/':
+                    printf("DIV R0, %s\n", op2);
+                    break;
+            }
+            printf("MOV %s, R0\n", tempVar);
+        }
+    }
+}
+
+int main() {
+    char expression[MAX_LEN];
+
+    printf("Enter an arithmetic expression (e.g., a+b*c): ");
+    scanf("%s", expression);
+
+    generateAssembly(expression);
+    printSymbolTable();
+
+    return 0;
+}
